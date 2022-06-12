@@ -1,35 +1,52 @@
 def who_is_winner(pieces_position_list)
+  board = Array.new(7, '')
 
-  yellow = []
-  yellow_vert = []
-  red = []
-  red_vert = []
-  
-  board = []
-  7.times do 
-    board << ' '
-    yellow << 0
-    yellow_vert << 0
-    red << 0
-    red_vert << 0
-  end
-  
-  pieces_position_list.each do |move|
- 
-    yellow[move.split('')[0].ord - 65] = 1 if move.split('_')[1] == "Yellow"
-    yellow_vert[move.split('')[0].ord - 65] += 1 if move.split('_')[1] == "Yellow"
-    
-    red[move.split('')[0].ord - 65] = 1 if move.split('_')[1] == "Red"
-    red_vert[move.split('')[0].ord - 65] += 1 if move.split('_')[1] == "Red"
-    
+  pieces_position_list.each do |move| 
     board[move.split('')[0].ord - 65] += 'y' if move.split('_')[1] == "Yellow"
     board[move.split('')[0].ord - 65] += 'r' if move.split('_')[1] == "Red"
-  
     
-#     return "Yellow" if yellow.join.include?('1111') || yellow_vert.any? { |col| col == 4 }
-#     return "Red" if red.join.include?('1111') || red_vert.any? { |col| col == 4 }
-
+    return "Yellow" if horizontal_check(board, 'y') || vertical_check(board, 'y') || diag_check(board, 'y')
+    return "Red" if horizontal_check(board, 'r') || vertical_check(board, 'r') || diag_check(board, 'r')
+    
   end
-  p board
-#   "Draw"
+ "Draw"
+end
+
+def horizontal_check(board, color)
+  count = 0
+  6.times do |i|
+    count = 0
+    board.each do |col|
+      count = col[i] == color ? count + 1 : 0
+      return true if count == 4
+    end
+  end
+  false
+end
+
+def vertical_check(board, color)
+  count = 0 
+  board.each do |col|
+    count = 0
+    6.times do |i|
+      count = col[i] == color ? count + 1 : 0
+      return true if count == 4
+    end
+  end
+  false
+end
+  
+def diag_check(board, color)
+  count = 0
+  3.times do |row|
+    4.times do |col|
+      count = 0
+      count = board[col][row] == color ? count + 1 : 0
+      count = board[col + 1][row + 1] == color ? count + 1 : 0
+      count = board[col + 2][row + 2] == color ? count + 1 : 0
+      count = board[col + 3][row + 3] == color ? count + 1 : 0
+      return true if count == 4
+    end
+  end
+  false
 end
