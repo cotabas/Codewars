@@ -46,6 +46,12 @@ def diag_check(board, color)
       count = board[col + 2][row + 2] == color ? count + 1 : 0
       count = board[col + 3][row + 3] == color ? count + 1 : 0
       return true if count == 4
+      count = 0
+      count = board[col][row + 3] == color ? count + 1 : 0
+      count = board[col + 1][row + 2] == color ? count + 1 : 0
+      count = board[col + 2][row + 1] == color ? count + 1 : 0
+      count = board[col + 3][row] == color ? count + 1 : 0
+      return true if count == 4
     end
   end
   false
