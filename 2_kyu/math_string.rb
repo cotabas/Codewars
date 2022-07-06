@@ -1,33 +1,47 @@
 def calc expression
-  p expression
   expression.delete!(' ')
+  
+#   This line doesn't need to exsist, the loop checks for parenthesis **
   return exp(expression) unless /[\(\)]/.match(expression)
   
-  hold = []
-  start = ''
-  finish = ''
+#   passes each expression within a set parenthesis 
   while /[\(\)]/.match(expression)
+    hold = []
+    start = ''
+    finish = ''
+    
     expression.each_char.with_index do |char, dex|
       if expression.index('(') >= dex
+        next if dex == 0
         start = expression[0..dex - 1]
         next
       end
-      if hold.size > 0 && char == '('
+      
+      if char == '('
         hold = []
-        start = expression[0..dex]
+        start = expression[0..dex - 1]
       end
-      hold << char unless char == ')'
+      
       if char == ')'
-        finish = expression[dex + 1..expression.length]
+        finish = dex == expression.size ? '' : expression[dex + 1..-1]
         break
       end
+      hold << char 
     end
-    expression = start + exp(hold.join).to_s + finish  
+
+    expression = start + exp(hold.join).to_s + finish
+
   end
+  
   exp(expression)
+  
 end
 
+# Calculatates an expression without parenthesis
 def exp(expression)
+#   Todo: figure out why I seem to be the only one who declares a bunch of empty ***
+#   variables at the begining of my functions.. maybe there's something about    ***
+#   scope that I don't fully understand..                                        ***
   left = []
   right = []
   opp = []
@@ -46,6 +60,7 @@ def exp(expression)
       hold << char
       next
     end
+    
     if first_done == true && (/[+\-\/*]/.match(char) || dex == expression.size - 1)
       right << hold.join
       hold = []
@@ -59,10 +74,8 @@ def exp(expression)
       first_done = true
     end
   end
-  return hold.join.to_i if left.empty?
-  p left
-  p opp
-  p right
+  return hold.join.to_f if left.empty?
+
   opp.each_with_index do |op, dex|
     break if opp.size == 1
     if op == '/' || op == '*'
@@ -81,16 +94,16 @@ def exp(expression)
   opp.delete('')
   right.delete('')
   left.delete('')
-  p left
-  p opp
-  p right
-  return left[0] if opp.empty?
+
+  return left[0].to_f if opp.empty?
+  
   opp.each_with_index do |op, dex|   
-    answer = answer == 0 ? operator(op, left[dex].to_f, right[dex].to_f) : operator(op, answer, right[dex].to_f)
+    answer = answer == 0 ? operator(op, left[dex].to_f, right[dex].to_f) : operator(op, answer.to_f, right[dex].to_f)
   end
   answer
 end
 
+#   Apperently there's a ruby method called send that does this.. ***
 def operator(op, left, right)
   case op
   when '+'
