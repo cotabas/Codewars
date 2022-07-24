@@ -10,25 +10,94 @@ class Interpreter
     # your code here - feel free to use and/or modify the provided tokenizer
     @tokens = tokenize(expr).map{|a|a[0]}
     return '' if @tokens.empty?
-  p @tokens
+
     if @tokens[1] == '='
-      @vars[@tokens[0]] = @tokens[2].to_i
+      replace_var_values
+      if (@tokens.grep /[%\/*+\-]/).size > 0
+        parens while @tokens.include?('(')
+        @vars[@tokens[0]] = operate @tokens[2..-1] 
+      else
+        @vars[@tokens[0]] = @tokens[2].to_i
+      end
       return @vars[@tokens[0]]
+      
     end
     
     if @tokens.length == 1
+#       haha? is there a correct way to return an error?
       return error if @vars[@tokens[0]].nil?
+      
       return @vars[@tokens[0]] 
+      
     end
     
-    @tokens[0] = @vars[@tokens[0]] unless /[0-9]/.match(@tokens[0])
-    @tokens[2] = @vars[@tokens[2]] unless /[0-9]/.match(@tokens[2])
-    return @tokens[0].to_i.send @tokens[1], @tokens[2].to_i if /[%+\-\/*]/.match(@tokens[1])
+    replace_var_values
+ 
+    parens while @tokens.include?('(')
+    
+    return operate @tokens
     
   end
 
   private
+  
+  def parens
+      start = 0
+      stop = 0
+      count = 0
+      last = false
+      exp = []
+      @tokens.each_with_index do |toke, dex|
+        if toke == '('
+          start = dex 
+          last = true
+        end
+        
+        if toke == ')' && last == true
+          stop = dex 
+          last = false
+        end
+        
+      end
 
+#       This - 1 is here to leave the ')' to be replaced by the operated value below
+      (start..stop - 1).each do |dex|      
+        exp << @tokens.delete_at(dex - count)
+        count += 1
+      end
+      exp.delete('(')
+
+      @tokens[start] = operate exp
+  end
+    
+  def operate exp
+    while (exp.grep /[%\/*]/).size > 0
+      exp.each_with_index do |toke, dex|
+        if /[%\/*]/.match(toke.to_s)
+          exp[dex - 1] = exp[dex - 1].to_i.send(toke, exp[dex + 1].to_i) 
+          exp.delete_at(dex)
+          exp.delete_at(dex)
+        end
+      end
+    end
+    while (exp.grep /[+\-]/).size > 0
+      exp.each_with_index do |toke, dex|
+        if /[+\-]/.match(toke.to_s)
+          exp[dex - 1] = exp[dex - 1].to_i.send(toke, exp[dex + 1].to_i) 
+          exp.delete_at(dex)
+          exp.delete_at(dex)
+        end
+      end
+    end
+    exp[0]
+  end
+  
+  def replace_var_values
+    @tokens.each_with_index do |toke, dex|
+      @tokens[dex] = @vars[toke] if @vars.include?(toke)
+    end
+  end
+  
   def tokenize program
     return [] if program == ''
 
