@@ -1,5 +1,7 @@
 def count_smileys(arr)
   arr.map { |face| 
-    
-    (face[0] == ':' || face[0] == ';') && (face.include?(')') || face.include?('D')) }.count(true)
+      [';', ':'].any?(face[0]) &&
+      ['-', '~', ')', 'D'].any?(face[1]) &&
+      ([')', 'D'].any?(face[2]) || face[2].nil?)    
+    }.count(true)
 end
